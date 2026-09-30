@@ -1,0 +1,106 @@
+"""หน้ากรอกข้อมูลสุขภาพสำหรับส่งต่อไปยังหน้าแสดงผล."""
+
+TITLE = "กรอกข้อมูล"
+
+
+def analyze_health(weight, height_cm, systolic, diastolic, glucose):
+    height_m = height_cm / 100
+    bmi = round(weight / (height_m ** 2), 2)
+    risks = []
+    recommendations = []
+
+    if bmi < 18.5:
+        bmi_status, bmi_color = "น้ำหนักน้อยกว่าเกณฑ์ (ผอม)", "warning"
+        risks.append({"disease": "ภาวะขาดสารอาหาร", "level": "ปานกลาง", "color": "warning"})
+        recommendations.append("ควรรับประทานอาหารให้ครบ 5 หมู่")
+    elif bmi <= 22.9:
+        bmi_status, bmi_color = "สมส่วน / สุขภาพดี", "success"
+    elif bmi <= 24.9:
+        bmi_status, bmi_color = "น้ำหนักเกิน", "info"
+        risks.append({"disease": "โรคอ้วนระยะเริ่มต้น", "level": "เริ่มต้น", "color": "info"})
+    elif bmi <= 29.9:
+        bmi_status, bmi_color = "อ้วนระดับ 1", "warning"
+        risks.append({"disease": "โรคอ้วนระดับ 1", "level": "สูง", "color": "warning"})
+        recommendations.append("ควรออกกำลังกายและลดอาหารหวาน มัน เค็ม")
+    else:
+        bmi_status, bmi_color = "อ้วนระดับ 2", "danger"
+        risks.append({"disease": "โรคอ้วนขั้นรุนแรง", "level": "สูงมาก", "color": "danger"})
+        recommendations.append("ควรพบแพทย์หรือโภชนากร")
+
+    if systolic < 120 and diastolic < 80:
+        bp_status, bp_color = "ความดันโลหิตปกติ", "success"
+    elif systolic <= 129 and diastolic < 80:
+        bp_status, bp_color = "ความดันโลหิตเริ่มสูง", "info"
+        risks.append({"disease": "แนวโน้มความดันโลหิตสูง", "level": "เริ่มต้น", "color": "info"})
+    elif systolic <= 139 or diastolic <= 89:
+        bp_status, bp_color = "ความดันโลหิตสูง ระยะที่ 1", "warning"
+        risks.append({"disease": "ความดันโลหิตสูง ระยะที่ 1", "level": "ปานกลาง", "color": "warning"})
+    else:
+        bp_status, bp_color = "ความดันโลหิตสูง ระยะที่ 2", "danger"
+        risks.append({"disease": "ความดันโลหิตสูง ระยะที่ 2", "level": "สูงมาก", "color": "danger"})
+
+    if glucose is None:
+        glucose_status, glucose_color = "ไม่ได้ระบุ", "info"
+    elif glucose < 70:
+        glucose_status, glucose_color = "น้ำตาลในเลือดต่ำ", "danger"
+        risks.append({"disease": "น้ำตาลในเลือดต่ำ", "level": "อันตราย", "color": "danger"})
+    elif glucose <= 99:
+        glucose_status, glucose_color = "ระดับน้ำตาลปกติ", "success"
+    elif glucose <= 125:
+        glucose_status, glucose_color = "เสี่ยงเบาหวาน", "warning"
+        risks.append({"disease": "ภาวะเสี่ยงโรคเบาหวาน", "level": "ปานกลาง", "color": "warning"})
+    else:
+        glucose_status, glucose_color = "เข้าข่ายโรคเบาหวาน", "danger"
+        risks.append({"disease": "โรคเบาหวาน", "level": "สูงมาก", "color": "danger"})
+
+    if any(r["color"] == "danger" for r in risks):
+        overall_risk, overall_color = "ความเสี่ยงระดับสูง", "danger"
+    elif any(r["color"] == "warning" for r in risks):
+        overall_risk, overall_color = "ความเสี่ยงระดับปานกลาง", "warning"
+    elif any(r["color"] == "info" for r in risks):
+        overall_risk, overall_color = "ความเสี่ยงระดับเริ่มต้น", "info"
+    else:
+        overall_risk, overall_color = "สุขภาพดีปกติ", "success"
+
+    return {
+        "weight": weight, "height_cm": height_cm, "sys": systolic, "dia": diastolic,
+        "glucose": glucose, "bmi": bmi, "bmi_status": bmi_status, "bmi_color": bmi_color,
+        "bp_status": bp_status, "bp_color": bp_color, "glucose_status": glucose_status,
+        "glucose_color": glucose_color, "overall_risk": overall_risk,
+        "overall_color": overall_color, "risks": risks, "recommendations": recommendations,
+    }
+
+
+def build(query=None):
+    query = query or {}
+    result = None
+    error_msg = None
+
+    if "weight" in query and "height" in query:
+        try:
+            weight = float(query.get("weight", 0))
+            height = float(query.get("height", 0))
+            systolic = int(query.get("sys", 120))
+            diastolic = int(query.get("dia", 80))
+
+            glucose_text = query.get("glucose", "")
+            glucose = float(glucose_text) if glucose_text else None
+
+            if weight <= 0 or height <= 0:
+                raise ValueError
+
+            result = analyze_health(
+                weight,
+                height,
+                systolic,
+                diastolic,
+                glucose
+            )
+
+        except (TypeError, ValueError):
+            error_msg = "กรุณากรอกข้อมูลเป็นตัวเลขที่มากกว่า 0"
+
+    return {
+        "result": result,
+        "error_msg": error_msg
+    }
