@@ -1,0 +1,91 @@
+"""pages/page1.py - Health Tech Logic rules and user guide."""
+import storage
+
+TITLE = "เกณฑ์วัดระดับประเมินสุขภาพ"
+
+
+def build():
+    """ส่งกฎสุขภาพและคู่มือการใช้งานไปยัง template."""
+    all_logs = storage.load() if hasattr(storage, "load") else []
+
+    bmi_rules = [
+        {"range": "< 18.5", "category": "ผอม / น้ำหนักน้อยกว่าเกณฑ์", "risk": "เสี่ยงขาดสารอาหาร", "badge": "warning", "advice": "ควรรับประทานอาหารให้ครบ 5 หมู่ และเพิ่มพลังงาน"},
+        {"range": "18.5 - 22.9", "category": "สมส่วน / สุขภาพดี", "risk": "ปกติ", "badge": "success", "advice": "รักษาน้ำหนักและออกกำลังกายสม่ำเสมอ"},
+        {"range": "23.0 - 24.9", "category": "น้ำหนักเกิน", "risk": "ปานกลาง", "badge": "info", "advice": "ควบคุมอาหารหวาน มัน เค็ม และเพิ่มการเคลื่อนไหว"},
+        {"range": "25.0 - 29.9", "category": "อ้วนระดับ 1", "risk": "สูง", "badge": "warning", "advice": "ควรออกกำลังกายและควบคุมอาหาร"},
+        {"range": ">= 30.0", "category": "อ้วนระดับ 2", "risk": "สูงมาก", "badge": "danger", "advice": "ควรปรึกษาแพทย์หรือโภชนากร"},
+    ]
+
+    bp_rules = [
+        {"type": "ปกติ", "sys": "< 120", "dia": "< 80", "status": "ปกติ", "badge": "success"},
+        {"type": "เริ่มสูง", "sys": "120 - 129", "dia": "< 80", "status": "เฝ้าระวัง", "badge": "info"},
+        {"type": "ความดันสูง ระยะ 1", "sys": "130 - 139", "dia": "80 - 89", "status": "เสี่ยงปานกลาง", "badge": "warning"},
+        {"type": "ความดันสูง ระยะ 2", "sys": ">= 140", "dia": ">= 90", "status": "เสี่ยงสูง", "badge": "danger"},
+    ]
+
+    glucose_rules = [
+        {"fbs": "< 70 mg/dL", "result": "น้ำตาลในเลือดต่ำ", "badge": "danger"},
+        {"fbs": "70 - 99 mg/dL", "result": "ปกติ", "badge": "success"},
+        {"fbs": "100 - 125 mg/dL", "result": "เสี่ยงเบาหวาน", "badge": "warning"},
+        {"fbs": ">= 126 mg/dL", "result": "เข้าข่ายเบาหวาน", "badge": "danger"},
+    ]
+
+    steps = [
+        {
+            "num": "01",
+            "title": "เตรียมข้อมูลสุขภาพ",
+            "desc": "เตรียมน้ำหนัก ส่วนสูง ความดันตัวบน/ตัวล่าง และค่าน้ำตาล FBS ถ้ามี",
+            "icon": "ข้อมูล",
+        },
+        {
+            "num": "02",
+            "title": "กรอกข้อมูลในหน้า Page 3",
+            "desc": "เลือกเมนู Page 3 แล้วกรอกข้อมูลให้ครบถ้วนและเป็นตัวเลขที่ถูกต้อง",
+            "icon": "กรอก",
+        },
+        {
+            "num": "03",
+            "title": "กดปุ่มคำนวณผล",
+            "desc": "ระบบจะคำนวณ BMI วิเคราะห์ความดันโลหิต และประเมินระดับน้ำตาล",
+            "icon": "คำนวณ",
+        },
+        {
+            "num": "04",
+            "title": "อ่านผลการประเมิน",
+            "desc": "ตรวจสอบระดับความเสี่ยงและคำแนะนำที่แสดงบนหน้าผลลัพธ์",
+            "icon": "ผลลัพธ์",
+        }
+    ]
+
+    faqs = [
+        {
+            "q": "ระบบใช้ข้อมูลอะไรในการประเมิน?",
+            "a": "ระบบใช้น้ำหนัก ส่วนสูง ความดันโลหิต และค่าน้ำตาล FBS เพื่อคัดกรองความเสี่ยงเบื้องต้น"
+        },
+        {
+            "q": "ถ้าไม่มีค่าน้ำตาลในเลือดจะใช้งานได้หรือไม่?",
+            "a": "ใช้งานได้ ค่าน้ำตาลเป็นข้อมูลเพิ่มเติม ระบบจะประเมินจาก BMI และความดันโลหิตแทน"
+        },
+        {
+            "q": "ผลลัพธ์ใช้แทนการวินิจฉัยของแพทย์ได้หรือไม่?",
+            "a": "ไม่ได้ ผลลัพธ์ใช้เพื่อคัดกรองเบื้องต้นเท่านั้น หากมีความกังวลควรพบแพทย์"
+        }
+    ]
+
+    return {
+        "course_code": "1309102",
+        "course_name": "Computer Programming Project",
+        "faculty": "คณะวิศวกรรมศาสตร์ มหาวิทยาลัยอุบลราชธานี",
+        "project_name": "Health Tech Logic",
+        "stats": {
+            "total_rules": len(bmi_rules) + len(bp_rules) + len(glucose_rules),
+            "supported_indicators": 3,
+            "accuracy_target": "100%",
+            "test_count": len(all_logs) if isinstance(all_logs, list) else 0,
+        },
+        "bmi_rules": bmi_rules,
+        "bp_rules": bp_rules,
+        "glucose_rules": glucose_rules,
+        "steps": steps,
+        "faqs": faqs,
+    }
