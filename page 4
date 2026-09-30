@@ -1,0 +1,59 @@
+"""หน้าประมวลผลสุขภาพและบันทึกประวัติการใช้งาน."""
+import json
+import os
+from datetime import datetime
+
+from pages.page2 import analyze_health
+
+TITLE = "ประมวลผลสุขภาพ"
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HISTORY_FILE = os.path.join(HERE, "health_history.json")
+
+
+def load_history():
+    try:
+        with open(HISTORY_FILE, encoding="utf-8") as file:
+            history = json.load(file)
+            return history if isinstance(history, list) else []
+    except (OSError, json.JSONDecodeError):
+        return []
+
+
+def save_history(history):
+    with open(HISTORY_FILE, "w", encoding="utf-8") as file:
+        json.dump(history, file, ensure_ascii=False, indent=2)
+
+
+def build(query=None):
+    query = query or {}
+    result = None
+    error_msg = None
+    history = load_history()
+
+    if query:
+        try:
+            name = query.get("name", "").strip()
+            weight = float(query.get("weight", 0))
+            height = float(query.get("height", 0))
+            systolic = int(query.get("sys", 0))
+            diastolic = int(query.get("dia", 0))
+            if not name or weight <= 0 or height <= 0 or systolic <= 0 or diastolic <= 0:
+                raise ValueError
+
+            result = analyze_health(weight, height, systolic, diastolic, None)
+            history.append({
+                "name": name,
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "weight": weight,
+                "height": height,
+                "sys": systolic,
+                "dia": diastolic,
+                "bmi": result["bmi"],
+                "overall_risk": result["overall_risk"],
+                "risks": [risk["disease"] for risk in result["risks"]],
+            })
+            save_history(history)
+        except (TypeError, ValueError, ZeroDivisionError):
+            error_msg = "กรุณากรอกชื่อและข้อมูลเป็นตัวเลขที่มากกว่า 0"
+
+    return {"result": result, "error_msg": error_msg, "history": history[-10:]}
