@@ -1,0 +1,13 @@
+{
+  "group": {
+    "name": "Health Tech Logic",
+    "section": "Sec3",
+    "topic": "ระบบคำนวณและประเมินความเสี่ยงโรคทางสุขภาพ",
+    "description": "ใช้ประเมินและคำนวณดัชนีสุขภาพเบื้องต้น พร้อมวิเคราะห์ความเสี่ยงของโรคความดันโลหิตสูง"
+  },
+  "members": [
+    {"name": "นาย ธนภัทร บำรุงตา", "id": "69130041484", "role": "Project Leader", "task": "page1 · รายการ"},
+    {"name": "นาย ธนกฎต ณัฏฐ์ภูปภพ", "id": "69130041369", "role": "Frontend Dev", "task": "data.json+models.py · ฟอร์ม"},
+    {"name": "นางสาว ณัฐรดา กตะศิลา", "id": "69130041141", "role": "QA/Test", "task": "page3 · Home+team page"}
+  ]
+}
